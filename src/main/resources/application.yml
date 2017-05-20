@@ -1,0 +1,13 @@
+---
+
+spring:
+    datasource:
+        url: jdbc:mariadb://localhost:3306/ticketsale_db
+        username: ticketsale
+        password: ticketsale
+        driver-class-name: org.mariadb.jdbc.Driver
+    jpa:
+        properties:
+            hibernate: org.hibernate.dialect.MySQL5InnoDBDialect
+
+...

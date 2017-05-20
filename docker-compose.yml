@@ -1,0 +1,12 @@
+version: '2'
+services:
+  dev_ticketswap_db_server:
+    image: mariadb:10.1
+    command: mysqld
+    environment:
+      - "MYSQL_DATABASE=ticketsale_db"
+      - "MYSQL_USER=ticketsale"
+      - "MYSQL_PASSWORD=ticketsale"
+      - "MYSQL_ROOT_PASSWORD=root"
+    ports:
+      - "3306:3306"
