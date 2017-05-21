@@ -1,12 +1,16 @@
 package nl.first8.hu.ticketsale.registration;
 
-import java.io.Serializable;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import nl.first8.hu.ticketsale.sales.Ticket;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -22,6 +26,9 @@ public class Account implements Serializable {
     @OneToOne
     private AccountInfo info;
 
+    private List<Ticket> tickets = new ArrayList<>();
+
+
     public Account(final String emailAddress) {
         this.emailAddress = emailAddress;
     }
@@ -32,4 +39,8 @@ public class Account implements Serializable {
         this.info = info;
     }
 
+    public Account(Long id, String emailAddress) {
+        this.id = id;
+        this.emailAddress = emailAddress;
+    }
 }
