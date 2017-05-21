@@ -26,6 +26,7 @@ public class RegistrationRepository {
      * @throws EntityExistsException if the entity already exists
      */
     public void insert(final Account account) {
+        entityManager.persist(account.getInfo());
         entityManager.persist(account);
     }
 
@@ -40,7 +41,11 @@ public class RegistrationRepository {
      * @throws IllegalArgumentException if the given <code>account</code> is not
      * already an attached entity
      */
-    Account update(Account account) {
+    public Account update(Account account) {
+
+        final AccountInfo updatedInfo = entityManager.merge(account.getInfo());
+        account.setInfo(updatedInfo);
+
         return entityManager.merge(account);
     }
 

@@ -4,6 +4,7 @@ import java.io.Serializable;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -18,7 +19,7 @@ public class Account implements Serializable {
 
     private String emailAddress;
 
-    //TODO: add a one-to-one relationship with AccountInfo
+    @OneToOne
     private AccountInfo info;
 
     public Account(final String emailAddress) {

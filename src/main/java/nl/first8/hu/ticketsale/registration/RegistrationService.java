@@ -32,10 +32,12 @@ public class RegistrationService {
      * operation
      */
     public Account updateEmailAddress(final long id, @NonNull final String emailAddress) {
+        final Account accountToUpdate = repository.findById(id).orElseThrow(() -> new RuntimeException("No Account exists with id " + id));
+        accountToUpdate.setEmailAddress(emailAddress);
 
-        //TODO: implement
-        throw new UnsupportedOperationException("Not supported yet!");
+        return repository.update(accountToUpdate);
     }
+
     /**
      * Updates the AccountInfo of the Account identified by the given
      * <code>id</code>.
@@ -46,8 +48,10 @@ public class RegistrationService {
      * operation
      */
     public Account updateInfo(final long id, @NonNull final AccountInfo info) {
-        //TODO: implement
-        throw new UnsupportedOperationException("Not supported yet!");
+        final Account accountToUpdate = repository.findById(id).orElseThrow(() -> new RuntimeException("No Account exists with id " + id));
+        accountToUpdate.setInfo(info);
+
+        return repository.update(accountToUpdate);
     }
 
     public Optional<Account> getById(final long id) {
