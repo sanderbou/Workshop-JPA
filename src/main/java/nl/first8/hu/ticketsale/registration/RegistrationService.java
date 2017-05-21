@@ -22,8 +22,16 @@ public class RegistrationService {
         repository.insert(account);
     }
 
-    public Optional<Account> getById(@NonNull final String id) {
+    public Account update(@NonNull final Account account) {
+        return repository.update(account);
+    }
+
+    public Optional<Account> getById(@NonNull final Object id) {
         return repository.findById(id);
+    }
+
+    public Optional<Account> getByEmailAddress(@NonNull final String emailAddress) {
+        return repository.findByEmailAddress(emailAddress);
     }
 
     List<Account> list() {

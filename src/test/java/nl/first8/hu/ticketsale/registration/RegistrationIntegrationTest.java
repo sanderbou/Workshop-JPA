@@ -8,7 +8,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import javax.persistence.EntityManager;
-import org.hamcrest.Matchers;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
 import org.junit.Test;
@@ -47,20 +46,25 @@ public class RegistrationIntegrationTest {
     })
     @Test
     public void testInsert() throws Exception {
-        final Account expectedAccount = new Account("f.dejong@first8.nl");
+        final Account expectedAccount = new Account(1L, "f.dejong@first8.nl");
 
-        mvc.perform(
+        final MvcResult result = mvc.perform(
                 post("/registration/{emailAddress}", expectedAccount.getEmailAddress())
                         .accept(MediaType.APPLICATION_JSON)
-        ).andExpect(status().isOk());
+        ).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8)).andReturn();
 
-        final Account actualAccount = entityManager.find(Account.class, expectedAccount.getEmailAddress());
-        assertThat(actualAccount.getEmailAddress(), is(expectedAccount.getEmailAddress()));
+        final Long createdID = objectMapper.readValue(result.getResponse().getContentAsString(), Long.class);
+
+        final Account actualAccount = entityManager.find(Account.class, createdID);
+        assertThat(actualAccount, is(expectedAccount));
+
     }
 
     @Sql(statements = {
         "TRUNCATE TABLE account;",
-        "INSERT INTO account VALUES('f.dejong@first8.nl')"})
+        "INSERT INTO account(email_address) VALUES('f.dejong@first8.nl')"
+    })
     @Test
     public void testInsertDuplicateEmailAddress() throws Exception {
         mvc.perform(
@@ -71,29 +75,94 @@ public class RegistrationIntegrationTest {
 
     @Sql(statements = {
         "TRUNCATE TABLE account;",
-        "INSERT INTO account VALUES('f.dejong@first8.nl'),  ('t.poll@first8.nl')"})
+        "INSERT INTO account (email_address) VALUES('f.dejong@first8.nl'),  ('t.poll@first8.nl')"
+    })
     @Test
-    public void testGetById() throws Exception {
-
-        final String expectedAccount = "t.poll@first8.nl";
+    public void testUpdateEmailAddress() throws Exception {
+        final Account expectedAccount = new Account(1L, "t.poll@first8.nl");
 
         final MvcResult result = mvc.perform(
-                get("/registration/{emailAddress}", expectedAccount)
+                put("/registration/{id}/{emailAddress}", expectedAccount.getId(), expectedAccount.getEmailAddress())
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8)).andReturn();
+
+        final Account returnedAccount = account(result);
+        final Account actualAccountInDS = entityManager.find(Account.class, returnedAccount.getId());
+
+        assertThat(actualAccountInDS, is(expectedAccount));
+        assertThat(returnedAccount, is(expectedAccount));
+    }
+
+    @Sql(statements = {
+        "TRUNCATE TABLE account;",
+        "INSERT INTO account (email_address) VALUES('f.dejong@first8.nl')"
+    })
+    @Test
+    public void testUpdateEmailAddressNotExistent() throws Exception {
+        final Account expectedAccount = new Account(1L, "t.poll@first8.nl");
+
+        final MvcResult result = mvc.perform(
+                put("/registration/{id}/{emailAddress}", expectedAccount.getId(), expectedAccount.getEmailAddress())
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8)).andReturn();
+
+        final Account returnedAccount = account(result);
+        final Account actualAccountInDS = entityManager.find(Account.class, returnedAccount.getId());
+
+        assertThat(actualAccountInDS, is(expectedAccount));
+        assertThat(returnedAccount, is(expectedAccount));
+    }
+
+    @Sql(statements = {
+        "TRUNCATE TABLE account;",
+        "INSERT INTO account (email_address) VALUES('f.dejong@first8.nl'), ('t.poll@first8.nl')"
+    })
+    @Test
+    public void testUpdateEmailAddressNoChange() throws Exception {
+        final Account expectedAccount = new Account(1L, "f.dejong@first8.nl");
+
+        final MvcResult result = mvc.perform(
+                put("/registration/{id}/{emailAddress}", expectedAccount.getId(), expectedAccount.getEmailAddress())
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8)).andReturn();
+
+        final Account returnedAccount = account(result);
+        final Account actualAccountInDS = entityManager.find(Account.class, returnedAccount.getId());
+
+        assertThat(actualAccountInDS, is(expectedAccount));
+        assertThat(returnedAccount, is(expectedAccount));
+    }
+
+    @Sql(statements = {
+        "TRUNCATE TABLE account;",
+        "INSERT INTO account (email_address)  VALUES('f.dejong@first8.nl'),  ('t.poll@first8.nl')"
+    })
+    @Test
+    public void testGetByEmailAddress() throws Exception {
+
+        final Account expectedAccount = new Account(2L, "t.poll@first8.nl");
+
+        final MvcResult result = mvc.perform(
+                get("/registration/email_address/{emailAddress}", expectedAccount.getEmailAddress())
                         .accept(MediaType.APPLICATION_JSON)
         )
                 .andExpect(status().isOk())
                 .andReturn();
 
-        assertThat(account(result).getEmailAddress(), is(expectedAccount));
+        assertThat(account(result), is(expectedAccount));
     }
 
     @Sql(statements = {
         "TRUNCATE TABLE account;",
-        "INSERT INTO account VALUES('f.dejong@first8.nl'), ('t.poll@first8.nl')"})
+        "INSERT INTO account (email_address) VALUES('f.dejong@first8.nl'), ('t.poll@first8.nl')"
+    })
     @Test
-    public void testGetByIdNotAvailable() throws Exception {
+    public void testGetByEmailAddressNotAvailable() throws Exception {
         mvc.perform(
-                get("/registration/{emailAddress}", "r.boss@first8.nl")
+                get("/registration/email_address/{emailAddress}", "r.boss@first8.nl")
                         .accept(MediaType.APPLICATION_JSON)
         )
                 .andExpect(status().isNotFound())
@@ -102,11 +171,45 @@ public class RegistrationIntegrationTest {
 
     @Sql(statements = {
         "TRUNCATE TABLE account;",
-        "INSERT INTO account VALUES('f.dejong@first8.nl'), ('t.poll@first8.nl')"})
+        "INSERT INTO account (email_address) VALUES('f.dejong@first8.nl'), ('t.poll@first8.nl')"
+    })
+    @Test
+    public void testGetById() throws Exception {
+
+        final Account expectedAccount = new Account(2L, "t.poll@first8.nl");
+
+        final MvcResult result = mvc.perform(
+                get("/registration/id/{id}", expectedAccount.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+        )
+                .andExpect(status().isOk())
+                .andReturn();
+
+        assertThat(account(result), is(expectedAccount));
+    }
+
+    @Sql(statements = {
+        "TRUNCATE TABLE account;",
+        "INSERT INTO account (email_address) VALUES('f.dejong@first8.nl'), ('t.poll@first8.nl')"
+    })
+    @Test
+    public void testGetByIdNotAvailable() throws Exception {
+        mvc.perform(
+                get("/registration/email_address/{emailAddress}", "r.boss@first8.nl")
+                        .accept(MediaType.APPLICATION_JSON)
+        )
+                .andExpect(status().isNotFound())
+                .andReturn();
+    }
+
+    @Sql(statements = {
+        "TRUNCATE TABLE account;",
+        "INSERT INTO account (email_address) VALUES('f.dejong@first8.nl'), ('t.poll@first8.nl')"
+    })
     @Test
     public void testGetAll() throws Exception {
 
-        List<Account> expectedAccounts = Arrays.asList(new Account("t.poll@first8.nl"), new Account("f.dejong@first8.nl"));
+        List<Account> expectedAccounts = Arrays.asList(new Account(2L, "t.poll@first8.nl"), new Account(1L, "f.dejong@first8.nl"));
 
         MvcResult result = mvc.perform(
                 get("/registration/")

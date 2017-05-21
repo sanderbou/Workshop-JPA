@@ -29,6 +29,21 @@ public class RegistrationRepository {
     }
 
     /**
+     * Updates the account with the <code>id</code> that matches the
+     * <code>id</code> of the given <code>account</code>
+     *
+     * @param account the updates field(s) of the account
+     * @return a <i>new</i> Account instances, containing the latest view of
+     * this Account entity.
+     *
+     * @throws IllegalArgumentException if the given <code>account</code> is not
+     * already an attached entity
+     */
+    Account update(Account account) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    /**
      * Optionally returns the Account identified by the given <code>id</code>
      *
      * @param id the id of the Account to find
@@ -36,8 +51,21 @@ public class RegistrationRepository {
      * {@link Optional#empty() empty} Optional if no Account could be identified
      * with the given <code>id</code>.
      */
-    public Optional<Account> findById(final String id) {
+    public Optional<Account> findById(final Object id) { //TODO: implement the proper data type!
         return Optional.ofNullable(entityManager.find(Account.class, id));
+    }
+
+    /**
+     * Optionally returns the Account identified by the given <code>id</code>
+     *
+     * @param emailAddress the email address of the Account to find
+     * @return Returns the Account identified by the given
+     * <code>emailAddress</code> or an     * {@link Optional#empty() empty} Optional if no Account could be identified
+     * with the given
+     * <code>emailAddress</code>.
+     */
+    Optional<Account> findByEmailAddress(String emailAddress) {
+        throw new UnsupportedOperationException("Not supported yet!");
     }
 
     /**
@@ -49,5 +77,7 @@ public class RegistrationRepository {
     public List<Account> findAll() {
         return entityManager.createQuery("SELECT a FROM Account a", Account.class).getResultList();
     }
+
+
 
 }
