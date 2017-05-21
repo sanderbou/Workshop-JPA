@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -27,12 +27,14 @@ public class RegistrationResource {
     }
 
     @PostMapping(path = "/{emailAddress:.+}")
-    public ResponseEntity<Long> post(@PathVariable("emailAddress") final String emailAddress) {
+    public ResponseEntity<Long> post(@PathVariable("emailAddress") final String emailAddress, @RequestBody final AccountInfo info) {
         try {
-            service.insert(new Account(emailAddress));
+            final Account accountToCreate = new Account(null, emailAddress, info);
 
-            Optional<Account> account = service.getByEmailAddress(emailAddress);
-            return account
+            service.insert(accountToCreate);
+
+            Optional<Account> createdAccount = service.getByEmailAddress(emailAddress);
+            return createdAccount
                     .map(Account::getId)
                     .map(id -> ResponseEntity.ok(id))
                     .orElse(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
@@ -43,9 +45,20 @@ public class RegistrationResource {
     }
 
     @PutMapping(path = "/{id}/{emailAddress:.+}")
-    public ResponseEntity<Account> put(@PathVariable("id") final Long id, @PathVariable("emailAddress") final String emailAddress) {
+    public ResponseEntity<Account> putEmailAddress(@PathVariable("id") final Long id, @PathVariable("emailAddress") final String emailAddress) {
         try {
-            final Account updatedAccount = service.update(new Account(id, emailAddress));
+            final Account updatedAccount = service.updateEmailAddress(id, emailAddress);
+
+            return ResponseEntity.ok(updatedAccount);
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
+    }
+
+    @PutMapping(path = "/{id}")
+    public ResponseEntity<Account> putAccountInfo(@PathVariable("id") final Long id, @RequestBody final AccountInfo info) {
+        try {
+            final Account updatedAccount = service.updateInfo(id, info);
 
             return ResponseEntity.ok(updatedAccount);
         } catch (RuntimeException ex) {

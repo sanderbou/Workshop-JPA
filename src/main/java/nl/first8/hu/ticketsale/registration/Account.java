@@ -4,14 +4,12 @@ import java.io.Serializable;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class Account implements Serializable {
 
     @Id
@@ -20,8 +18,17 @@ public class Account implements Serializable {
 
     private String emailAddress;
 
-    public Account(String emailAddress) {
+    //TODO: add a one-to-one relationship with AccountInfo
+    private AccountInfo info;
+
+    public Account(final String emailAddress) {
         this.emailAddress = emailAddress;
+    }
+
+    public Account(final Long id, final String emailAddress, final AccountInfo info) {
+        this.id = id;
+        this.emailAddress = emailAddress;
+        this.info = info;
     }
 
 }

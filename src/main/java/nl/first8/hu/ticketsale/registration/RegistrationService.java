@@ -22,11 +22,35 @@ public class RegistrationService {
         repository.insert(account);
     }
 
-    public Account update(@NonNull final Account account) {
-        return repository.update(account);
+    /**
+     * Updates the e-mail address of the Account identified by the given
+     * <code>id</code>.
+     *
+     * @param id the id of the Account to update
+     * @param emailAddress the email address to update
+     * @return the updated Account that reflects the change made by this
+     * operation
+     */
+    public Account updateEmailAddress(final long id, @NonNull final String emailAddress) {
+
+        //TODO: implement
+        throw new UnsupportedOperationException("Not supported yet!");
+    }
+    /**
+     * Updates the AccountInfo of the Account identified by the given
+     * <code>id</code>.
+     *
+     * @param id the id of the Account to update
+     * @param info the new or updated AccountInfo
+     * @return the updated Account that reflects the change made by this
+     * operation
+     */
+    public Account updateInfo(final long id, @NonNull final AccountInfo info) {
+        //TODO: implement
+        throw new UnsupportedOperationException("Not supported yet!");
     }
 
-    public Optional<Account> getById(@NonNull final Long id) {
+    public Optional<Account> getById(final long id) {
         return repository.findById(id);
     }
 
