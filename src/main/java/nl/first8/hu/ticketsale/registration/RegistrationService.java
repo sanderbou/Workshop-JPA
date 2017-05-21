@@ -26,7 +26,7 @@ public class RegistrationService {
         return repository.update(account);
     }
 
-    public Optional<Account> getById(@NonNull final Object id) {
+    public Optional<Account> getById(@NonNull final Long id) {
         return repository.findById(id);
     }
 

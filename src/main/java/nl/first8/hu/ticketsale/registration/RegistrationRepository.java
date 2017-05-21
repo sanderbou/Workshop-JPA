@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -40,7 +41,7 @@ public class RegistrationRepository {
      * already an attached entity
      */
     Account update(Account account) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return entityManager.merge(account);
     }
 
     /**
@@ -51,7 +52,7 @@ public class RegistrationRepository {
      * {@link Optional#empty() empty} Optional if no Account could be identified
      * with the given <code>id</code>.
      */
-    public Optional<Account> findById(final Object id) { //TODO: implement the proper data type!
+    public Optional<Account> findById(final Long id) {
         return Optional.ofNullable(entityManager.find(Account.class, id));
     }
 
@@ -60,12 +61,18 @@ public class RegistrationRepository {
      *
      * @param emailAddress the email address of the Account to find
      * @return Returns the Account identified by the given
-     * <code>emailAddress</code> or an     * {@link Optional#empty() empty} Optional if no Account could be identified
-     * with the given
+     * <code>emailAddress</code> or an {@link Optional#empty() empty} Optional
+     * if no Account could be identified with the given
      * <code>emailAddress</code>.
      */
     Optional<Account> findByEmailAddress(String emailAddress) {
-        throw new UnsupportedOperationException("Not supported yet!");
+        try {
+            return Optional.of(entityManager.createQuery("SELECT a FROM Account a WHERE a.emailAddress =:emailAddress", Account.class)
+                    .setParameter("emailAddress", emailAddress)
+                    .getSingleResult());
+        } catch (NoResultException ex) {
+            return Optional.empty();
+        }
     }
 
     /**
@@ -77,7 +84,5 @@ public class RegistrationRepository {
     public List<Account> findAll() {
         return entityManager.createQuery("SELECT a FROM Account a", Account.class).getResultList();
     }
-
-
 
 }
