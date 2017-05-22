@@ -8,10 +8,17 @@ import javax.persistence.OneToOne;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
 @Entity
 @Data
 @NoArgsConstructor
 public class Account implements Serializable {
+
+    /*
+     * TODO: synchronize the insert and update of the Account instances with the associated AccountInfo
+     *
+     * (hint: the associated methods for persisting and updating can be simplified by removing a few lines of code)
+     */
 
     @Id
     @GeneratedValue
