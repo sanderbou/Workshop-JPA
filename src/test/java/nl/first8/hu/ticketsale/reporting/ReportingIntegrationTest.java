@@ -54,6 +54,7 @@ public class ReportingIntegrationTest {
         Account accountHouten = helper.createAccount("user@houten.museum", "Houten");
         helper.createTicket(concertMetal1, accountZeist);
         helper.createTicket(concertMetal1, accountNieuwegein);
+        helper.createTicket(concertMetal2, accountNieuwegein);
         helper.createTicket(concertElec, accountNieuwegein);
         helper.createTicket(concertElec, accountHouten);
 
@@ -65,11 +66,25 @@ public class ReportingIntegrationTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8)).andReturn();
 
 
-        final List<LocationReport> receivedReport= reports(result);
+        final List<LocationReport> receivedReports= reports(result);
+
+        assertThat(3, is(receivedReports.size()));
+
+        assertThat(concertMetal1.getArtist(), is(receivedReports.get(0).getArtist()));
+        assertThat(concertMetal1.getLocation().getName(), is(receivedReports.get(0).getConcertLocations()));
+        assertThat(accountZeist.getInfo().getCity(), is(receivedReports.get(0).getTicketCity()));
+
+        assertThat(concertMetal1.getArtist(), is(receivedReports.get(1).getArtist()));
+        assertThat(concertMetal1.getLocation().getName(), is(receivedReports.get(1).getConcertLocations()));
+        assertThat(accountNieuwegein.getInfo().getCity(), is(receivedReports.get(1).getTicketCity()));
+
+        assertThat(concertMetal2.getArtist(), is(receivedReports.get(2).getArtist()));
+        assertThat(concertMetal2.getLocation().getName(), is(receivedReports.get(2).getConcertLocations()));
+        assertThat(accountNieuwegein.getInfo().getCity(), is(receivedReports.get(2).getTicketCity()));
 
     }
 
-    private List<LocationReport> reports(final MvcResult result) throws UnsupportedEncodingException, IOException {
+    private List<LocationReport> reports(final MvcResult result) throws IOException {
         return objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<List<LocationReport>>() {
         });
     }

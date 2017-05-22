@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,5 +17,5 @@ public class LocationReport implements Serializable {
 
     private String artist;
     private String concertLocations;
-    private String accountLocations;
+    private String ticketCity;
 }

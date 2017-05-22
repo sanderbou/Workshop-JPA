@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
 import java.util.List;
 
 @Repository
@@ -17,7 +18,7 @@ public class ReportRepository {
     }
 
     public List<LocationReport> findGenreLocations(String genre) {
-        //TODO Build report query
-        throw new UnsupportedOperationException();
+        //TODO
+       throw new UnsupportedOperationException();
     }
 }
