@@ -6,6 +6,8 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import java.util.List;
 
 @Repository
@@ -26,11 +28,13 @@ public class SalesRepository {
      * @throws EntityExistsException if the entity already exists
      */
     public void insert(final Ticket ticket) {
-        throw new UnsupportedOperationException();
+        entityManager.persist(ticket);
     }
 
-
     public List<Ticket> findByAccount(Account account) {
-        throw new UnsupportedOperationException();
+        String jpql = "SELECT ticket FROM Ticket ticket WHERE ticket.account = :account";
+        TypedQuery<Ticket> query = entityManager.createQuery(jpql, Ticket.class);
+        query.setParameter("account", account);
+        return query.getResultList();
     }
 }

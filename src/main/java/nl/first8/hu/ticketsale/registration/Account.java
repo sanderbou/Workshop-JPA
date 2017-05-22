@@ -8,6 +8,7 @@ import nl.first8.hu.ticketsale.sales.Ticket;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,8 +27,8 @@ public class Account implements Serializable {
     @OneToOne
     private AccountInfo info;
 
+    @OneToMany(mappedBy = "account")
     private List<Ticket> tickets = new ArrayList<>();
-
 
     public Account(final String emailAddress) {
         this.emailAddress = emailAddress;
