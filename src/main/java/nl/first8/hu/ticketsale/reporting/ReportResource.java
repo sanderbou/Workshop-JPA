@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.transaction.Transactional;
+import java.util.List;
 
 @RestController
 @RequestMapping("/report")
@@ -24,10 +25,10 @@ public class ReportResource {
 
 
     @GetMapping(path = "/location")
-    public ResponseEntity<LocationReport> getById(@RequestParam("genre") final String genre) {
+    public ResponseEntity<List<LocationReport>> getById(@RequestParam("genre") final String genre) {
         try {
-            LocationReport report = repository.findGenreLocations(genre);
-            return ResponseEntity.ok(report);
+            List<LocationReport> reports = repository.findGenreLocations(genre);
+            return ResponseEntity.ok(reports);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }

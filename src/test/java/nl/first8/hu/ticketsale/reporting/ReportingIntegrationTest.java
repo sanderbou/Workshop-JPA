@@ -1,5 +1,6 @@
 package nl.first8.hu.ticketsale.reporting;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.first8.hu.ticketsale.registration.Account;
 import nl.first8.hu.ticketsale.util.TestRepository;
@@ -14,6 +15,10 @@ import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.List;
 
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
@@ -60,23 +65,14 @@ public class ReportingIntegrationTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8)).andReturn();
 
 
-        final LocationReport receivedReport= objectMapper.readValue(result.getResponse().getContentAsString(), LocationReport.class);
-
-        assertThat(receivedReport.getGenre(), is(requestedGenre));
-
-        assertThat(receivedReport.getAccountLocations(), contains(concertMetal1.getLocation().getName()));
-        assertThat(receivedReport.getAccountLocations(), contains(concertMetal2.getLocation().getName()));
-        assertThat(receivedReport.getAccountLocations(), not(contains(concertElec.getLocation().getName())));
-        assertThat(receivedReport.getAccountLocations(), not(contains(accountZeist.getInfo().getCity())));
-        assertThat(receivedReport.getAccountLocations(), not(contains(accountNieuwegein.getInfo().getCity())));
-        assertThat(receivedReport.getAccountLocations(), not(contains(accountHouten.getInfo().getCity())));
-
-        assertThat(receivedReport.getConcertLocations(), contains(accountZeist.getInfo().getCity()));
-        assertThat(receivedReport.getConcertLocations(), contains(accountNieuwegein.getInfo().getCity()));
-        assertThat(receivedReport.getConcertLocations(), not(contains(accountHouten.getInfo().getCity())));
-        assertThat(receivedReport.getConcertLocations(), not(contains(concertMetal1.getLocation().getName())));
-        assertThat(receivedReport.getConcertLocations(), not(contains(concertMetal2.getLocation().getName())));
-        assertThat(receivedReport.getConcertLocations(), not(contains(concertElec.getLocation().getName())));
+        final List<LocationReport> receivedReport= reports(result);
 
     }
+
+    private List<LocationReport> reports(final MvcResult result) throws UnsupportedEncodingException, IOException {
+        return objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<List<LocationReport>>() {
+        });
+    }
+
+
 }

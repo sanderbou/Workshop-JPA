@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
+import java.util.List;
 
 @Repository
 public class ReportRepository {
@@ -15,7 +16,7 @@ public class ReportRepository {
         this.entityManager = entityManager;
     }
 
-    public LocationReport findGenreLocations(String genre) {
+    public List<LocationReport> findGenreLocations(String genre) {
         //TODO Build report query
         throw new UnsupportedOperationException();
     }

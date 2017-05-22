@@ -14,6 +14,6 @@ import java.util.List;
 public class LocationReport implements Serializable {
 
     private String genre;
-    private List<String> concertLocations = new ArrayList<>();
-    private List<String> accountLocations = new ArrayList<>();
+    private String concertLocations;
+    private String accountLocations;
 }
