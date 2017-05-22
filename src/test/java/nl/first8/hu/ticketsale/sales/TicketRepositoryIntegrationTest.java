@@ -53,11 +53,10 @@ public class TicketRepositoryIntegrationTest {
         Concert concert = testRepository.createDefaultConcert("Parov Stellar", "Utrecht");
 
 
-        final MvcResult result = mvc.perform(
+        mvc.perform(
                 post("/sales/ticket").param("account_id", account.getId().toString()).param("concert_id", concert.getId().toString())
                         .accept(MediaType.APPLICATION_JSON)
-        ).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8)).andReturn();
+        ).andExpect(status().isOk());
 
 
         final Ticket ticket = testRepository.findTicket(concert, account);

@@ -29,7 +29,8 @@ public class TestRepository {
     }
 
     @Transactional(Transactional.TxType.REQUIRES_NEW)
-    public Ticket createDefaultTicket(Account account, String artist, String location) {
+    public Ticket createDefaultTicket(Account acc, String artist, String location) {
+        Account account = entityManager.find(Account.class, acc.getId());
         Concert concert = createDefaultConcert(artist, location);
         Ticket ticket = new Ticket(concert, account);
         entityManager.persist(ticket);
