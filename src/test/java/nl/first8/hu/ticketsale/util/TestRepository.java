@@ -3,6 +3,9 @@ package nl.first8.hu.ticketsale.util;
 import nl.first8.hu.ticketsale.registration.Account;
 import nl.first8.hu.ticketsale.registration.AccountInfo;
 import nl.first8.hu.ticketsale.sales.Ticket;
+import nl.first8.hu.ticketsale.sales.TicketId;
+import nl.first8.hu.ticketsale.venue.Concert;
+import nl.first8.hu.ticketsale.venue.Location;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,15 +28,37 @@ public class TestRepository {
         return account;
     }
 
-    public Ticket find(Long createdID) {
-        return entityManager.find(Ticket.class, createdID);
-    }
-
     @Transactional(Transactional.TxType.REQUIRES_NEW)
-    public Ticket createDefaultTicket(Account account, String artist) {
-        Ticket ticket = new Ticket(artist, "GENRELESS", "LOCATIONLESS");
-        ticket.setAccount(account);
+    public Ticket createDefaultTicket(Account account, String artist, String location) {
+        Concert concert = createDefaultConcert(artist, location);
+        Ticket ticket = new Ticket(concert, account);
         entityManager.persist(ticket);
         return ticket;
     }
+
+    public Ticket findTicket(Concert concert, Account account) {
+        TicketId key = new TicketId(concert, account);
+        return entityManager.find(Ticket.class, key);
+    }
+    
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    public Concert createDefaultConcert(String artist, String locationName) {
+        Location location = createLocation(locationName);
+        Concert concert = new Concert();
+        concert.setArtist(artist);
+        concert.setGenre("Grindcore");
+        concert.setLocation(location);
+        entityManager.persist(concert);
+        return concert;
+
+    }
+
+    private Location createLocation(String locationName) {
+        Location location = new Location();
+        location.setName(locationName);
+        entityManager.persist(location);
+        return location;
+    }
+
+    
 }

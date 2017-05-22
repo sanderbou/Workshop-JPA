@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.first8.hu.ticketsale.registration.Account;
 import nl.first8.hu.ticketsale.util.TestRepository;
+import nl.first8.hu.ticketsale.venue.Concert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Rollback(false)
-public class SalesIntegrationTest {
+public class TicketRepositoryIntegrationTest {
 
     @Autowired
     private MockMvc mvc;
@@ -49,22 +50,19 @@ public class SalesIntegrationTest {
     public void testInsertTicket() throws Exception {
 
         Account account = testRepository.createDefaultAccount("f.dejong@first8.nl");
+        Concert concert = testRepository.createDefaultConcert("Parov Stellar", "Utrecht");
 
-        final Ticket newTicket = new Ticket("Chinese Man", "Trip Hop", "Tovilo");
-
-        String ticketJson = objectMapper.writeValueAsString(newTicket);
 
         final MvcResult result = mvc.perform(
-                post("/sales/ticket").param("account_id", account.getId().toString())
-                        .accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON_UTF8).content(ticketJson)
+                post("/sales/ticket").param("account_id", account.getId().toString()).param("concert_id", concert.getId().toString())
+                        .accept(MediaType.APPLICATION_JSON)
         ).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8)).andReturn();
 
-        final Long createdID = readLongResponse(result);
 
-        final Ticket actualTicket = testRepository.find(createdID);
-        assertThat(actualTicket.getId(), is(createdID));
-        assertThat(actualTicket.getArtist(), is(newTicket.getArtist()));
+        final Ticket ticket = testRepository.findTicket(concert, account);
+        assertThat(ticket.getConcert().getArtist(), is(concert.getArtist()));
+        assertThat(ticket.getConcert().getLocation().getName(), is(concert.getLocation().getName()));
     }
 
     @Sql(statements = {
@@ -74,8 +72,8 @@ public class SalesIntegrationTest {
     public void testGetTickets() throws Exception {
 
         Account account = testRepository.createDefaultAccount("f.dejong@first8.nl");
-        Ticket ticketGorillaz = testRepository.createDefaultTicket(account, "Gorillaz");
-        Ticket ticketThieveryCo = testRepository.createDefaultTicket(account, "Thievery Cooperation");
+        Ticket ticketGorillaz = testRepository.createDefaultTicket(account, "Gorillaz", "Utrecht");
+        Ticket ticketThieveryCo = testRepository.createDefaultTicket(account, "Thievery Cooperation", "Apeldoorn");
 
 
         MvcResult result = mvc.perform(
@@ -88,14 +86,12 @@ public class SalesIntegrationTest {
 
         List<TicketDto> actualTickets = readTicketsResponse(result);
         assertEquals(2, actualTickets.size());
-        assertEquals(ticketGorillaz.getArtist(), actualTickets.get(0).getArtist());
-        assertEquals(ticketThieveryCo.getArtist(), actualTickets.get(1).getArtist());
+        assertEquals(ticketGorillaz.getConcert().getArtist(), actualTickets.get(0).getArtist());
+        assertEquals(ticketGorillaz.getConcert().getLocation().getName(), actualTickets.get(0).getLocation());
+        assertEquals(ticketThieveryCo.getConcert().getArtist(), actualTickets.get(1).getArtist());
+        assertEquals(ticketGorillaz.getConcert().getLocation().getName(), actualTickets.get(0).getLocation());
 
 
-    }
-
-    private Long readLongResponse(MvcResult result) throws java.io.IOException {
-        return objectMapper.readValue(result.getResponse().getContentAsString(), Long.class);
     }
 
     private List<TicketDto> readTicketsResponse(MvcResult result) throws IOException {

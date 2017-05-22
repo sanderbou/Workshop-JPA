@@ -22,10 +22,10 @@ public class SalesResource {
     }
 
     @PostMapping(path = "/ticket")
-    public ResponseEntity<Long> post(@RequestParam("account_id") final Long accountId, @RequestBody final Ticket requestTicket) {
+    public ResponseEntity post(@RequestParam("account_id") final Long accountId, @RequestParam("concert_id") final Long concertId) {
         try {
-            Ticket ticket = service.insert(accountId, requestTicket);
-            return ResponseEntity.ok(ticket.getId());
+            service.insert(accountId, concertId);
+            return ResponseEntity.ok().build();
         } catch (RuntimeException ex) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
@@ -36,7 +36,7 @@ public class SalesResource {
         try {
             List<Ticket> tickets = service.getById(accountId);
             List<TicketDto> responseTickets = tickets.stream()
-                    .map(t -> new TicketDto(t.getId(), t.getArtist(), t.getGenre(), t.getLocation()))
+                    .map(t -> new TicketDto(t.getConcert().getArtist(), t.getConcert().getGenre(), t.getConcert().getLocation().getName()))
                     .collect(Collectors.toList());
             return ResponseEntity.ok(responseTickets);
         } catch (RuntimeException e) {

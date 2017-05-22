@@ -6,19 +6,12 @@ import lombok.NoArgsConstructor;
 import nl.first8.hu.ticketsale.registration.Account;
 import nl.first8.hu.ticketsale.venue.Concert;
 
-import javax.persistence.*;
+import java.io.Serializable;
 
-@Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@IdClass(TicketId.class)
-public class Ticket {
-
+public class TicketId implements Serializable{
     private Concert concert;
-
-    @ManyToOne
-    @JoinColumn(name = "account_id", referencedColumnName = "id")
     private Account account;
-
 }
