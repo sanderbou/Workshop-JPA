@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -22,10 +23,24 @@ public class SalesResource {
     }
 
     @PostMapping(path = "/ticket")
-    public ResponseEntity post(@RequestParam("account_id") final Long accountId, @RequestParam("concert_id") final Long concertId) {
+    public ResponseEntity postTicket(@RequestParam("account_id") final Long accountId, @RequestParam("concert_id") final Long concertId) {
         try {
-            service.insert(accountId, concertId);
+            service.insertTicket(accountId, concertId);
             return ResponseEntity.ok().build();
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
+    }
+
+    @PostMapping(path = "/")
+    public ResponseEntity postSale(@RequestParam("account_id") final Long accountId, @RequestParam("concert_id") final Long concertId, @RequestParam("price") Integer price) {
+        try {
+            service.insertSale(accountId, concertId, price);
+
+            Optional<Sale> sale = service.getSale(accountId, concertId);
+
+            return sale.map(s -> ResponseEntity.ok(s.getId()))
+                    .orElse(ResponseEntity.notFound().build());
         } catch (RuntimeException ex) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
@@ -40,6 +55,7 @@ public class SalesResource {
                     .collect(Collectors.toList());
             return ResponseEntity.ok(responseTickets);
         } catch (RuntimeException e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
     }

@@ -12,17 +12,21 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.Rollback;
-import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.io.IOException;
 import java.util.List;
+import javax.persistence.EntityManager;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import org.junit.Before;
+import static org.mockito.Matchers.isNull;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.jdbc.JdbcTestUtils;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -43,9 +47,17 @@ public class TicketRepositoryIntegrationTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Sql(statements = {
-            "DELETE FROM `ticket`;",
-            "DELETE FROM `account`;"})
+    @Autowired
+    private EntityManager entityManager;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    @Before
+    public void cleanDatabase() {
+        JdbcTestUtils.deleteFromTables(jdbcTemplate, "sale", "ticket", "account");
+    }
+
     @Test
     public void testInsertTicket() throws Exception {
 
@@ -64,9 +76,6 @@ public class TicketRepositoryIntegrationTest {
         assertThat(ticket.getConcert().getLocation().getName(), is(concert.getLocation().getName()));
     }
 
-    @Sql(statements = {
-            "DELETE FROM `ticket`;",
-            "DELETE FROM `account`;"})
     @Test
     public void testGetTickets() throws Exception {
 
@@ -91,6 +100,52 @@ public class TicketRepositoryIntegrationTest {
         assertEquals(ticketGorillaz.getConcert().getLocation().getName(), actualTickets.get(0).getLocation());
 
 
+    }
+
+    @Test
+    public void testInsertSale() throws Exception {
+
+        Account account = testRepository.createDefaultAccount("t.poll@first8.nl");
+        Concert concert = testRepository.createDefaultConcert("Disturbed", "Verdedig, Enschede");
+
+        MvcResult result = mvc.perform(
+                post("/sales/")
+                        .param("account_id", account.getId().toString())
+                        .param("concert_id", concert.getId().toString())
+                        .param("price", Integer.toString(4500))
+        ).andExpect(status().isOk()).andReturn();
+
+        Long saleId = readSaleResult(result);
+
+
+        Ticket createdTicket = entityManager.find(Ticket.class, new TicketId(concert, account));
+        Sale createdSale = entityManager.find(Sale.class, saleId);
+
+        assertThat(createdSale.getTicket().getAccount().getId(), is(account.getId()));
+        assertThat(createdSale.getTicket().getConcert().getId(), is(createdTicket.getConcert().getId()));
+    }
+
+    @Test
+    public void testInsertSaleWithoutPayment() throws Exception {
+
+        Account account = testRepository.createDefaultAccount("t.poll@first8.nl");
+        Concert concert = testRepository.createDefaultConcert("Disturbed", "Verdedig, Enschede");
+
+        mvc.perform(
+                post("/sales/")
+                        .param("account_id", account.getId().toString())
+                        .param("concert_id", concert.getId().toString())
+                        .param("price", Integer.toString(0))
+        ).andExpect(status().isConflict());
+
+
+        Ticket createdTicket = entityManager.find(Ticket.class, new TicketId(concert, account));
+        assertThat(createdTicket, is(isNull()));
+
+    }
+
+    private Long readSaleResult(MvcResult result) throws IOException {
+        return objectMapper.readValue(result.getResponse().getContentAsString(), Long.class);
     }
 
     private List<TicketDto> readTicketsResponse(MvcResult result) throws IOException {

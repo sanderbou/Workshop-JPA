@@ -6,9 +6,10 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
-import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import java.util.List;
+import java.util.Optional;
+import javax.persistence.NoResultException;
 
 @Repository
 public class SalesRepository {
@@ -31,10 +32,37 @@ public class SalesRepository {
         entityManager.persist(ticket);
     }
 
+    public void insert(final Sale sale) {
+        entityManager.persist(sale);
+    }
+
+    Optional<Sale> findSaleByTicket(final Ticket ticket) {
+
+        try {
+            return Optional.of(entityManager.createQuery("SELECT s FROM Sale s WHERE s.ticket =:ticket", Sale.class)
+                    .setParameter("ticket", ticket)
+                    .getSingleResult());
+        } catch (NoResultException ex) {
+            return Optional.empty();
+        }
+
+
+    }
+
     public List<Ticket> findByAccount(Account account) {
         String jpql = "SELECT ticket FROM Ticket ticket WHERE ticket.account = :account";
         TypedQuery<Ticket> query = entityManager.createQuery(jpql, Ticket.class);
         query.setParameter("account", account);
         return query.getResultList();
     }
+
+    public Optional<Ticket> findTicket(final TicketId ticketId) {
+        return Optional.ofNullable(entityManager.find(Ticket.class, ticketId));
+    }
+
+    Optional<Ticket> findById(long ticketId) {
+        return Optional.ofNullable(entityManager.find(Ticket.class, ticketId));
+    }
+
+
 }
