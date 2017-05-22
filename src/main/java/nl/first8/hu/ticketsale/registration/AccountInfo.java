@@ -21,15 +21,18 @@ public class AccountInfo implements Serializable {
 
     private String telephoneNumber;
 
+    private String city;
+
     public AccountInfo(Long id, String street, String telephoneNumber) {
         this.id = id;
         this.street = street;
         this.telephoneNumber = telephoneNumber;
     }
 
-    public AccountInfo(String street, String telephoneNumber) {
+    public AccountInfo(String street, String telephoneNumber, String city) {
         this.street = street;
         this.telephoneNumber = telephoneNumber;
+        this.city = city;
     }
 
 }

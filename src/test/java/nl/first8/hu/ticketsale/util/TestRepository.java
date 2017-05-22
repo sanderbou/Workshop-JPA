@@ -20,7 +20,17 @@ public class TestRepository {
 
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     public Account createDefaultAccount(String emailAdress) {
-        AccountInfo info = new AccountInfo("TestStraat", "0612345678");
+        AccountInfo info = new AccountInfo("TestStraat", "0612345678", "Utrecht");
+        Account account = new Account(emailAdress);
+        account.setInfo(info);
+        entityManager.persist(info);
+        entityManager.persist(account);
+        return account;
+    }
+
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    public Account createAccount(String emailAdress, String city) {
+        AccountInfo info = new AccountInfo("TestStraat", "0612345678", city);
         Account account = new Account(emailAdress);
         account.setInfo(info);
         entityManager.persist(info);
@@ -35,6 +45,14 @@ public class TestRepository {
         Ticket ticket = new Ticket(concert, account);
         entityManager.persist(ticket);
         return ticket;
+    }
+
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    public void createTicket(Concert c, Account a) {
+        Concert concert = entityManager.find(Concert.class, c.getId());
+        Account account  = entityManager.find(Account.class, a.getId());
+        Ticket ticket = new Ticket(concert, account);
+        entityManager.persist(ticket);
     }
 
     public Ticket findTicket(Concert concert, Account account) {
@@ -54,6 +72,19 @@ public class TestRepository {
 
     }
 
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    public Concert createConcert(String artist, String genre, String locationName) {
+        Location location = createLocation(locationName);
+        Concert concert = new Concert();
+        concert.setArtist(artist);
+        concert.setGenre(genre);
+        concert.setLocation(location);
+        entityManager.persist(concert);
+        return concert;
+
+    }
+
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
     private Location createLocation(String locationName) {
         Location location = new Location();
         location.setName(locationName);
@@ -61,5 +92,6 @@ public class TestRepository {
         return location;
     }
 
-    
+
+
 }

@@ -16,8 +16,8 @@ public class RegistrationTestHelperService {
     }
 
     @Transactional(Transactional.TxType.REQUIRES_NEW)
-    public Account createAccount(final String emailAddress, final String street, final String telephoneNumber) {
-        final Account account = new Account(null, emailAddress, new AccountInfo(street, telephoneNumber));
+    public Account createAccount(final String emailAddress, final String street, final String telephoneNumber, String city) {
+        final Account account = new Account(null, emailAddress, new AccountInfo(street, telephoneNumber, city));
 
         entityManager.persist(account.getInfo());
         entityManager.persist(account);

@@ -3,21 +3,9 @@ package nl.first8.hu.ticketsale.registration;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import javax.persistence.EntityManager;
-import org.hamcrest.CoreMatchers;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import org.junit.Test;
-import static org.junit.Assert.*;
 import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,8 +18,18 @@ import org.springframework.test.jdbc.JdbcTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import javax.persistence.EntityManager;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -61,7 +59,7 @@ public class RegistrationIntegrationTest {
 
     @Test
     public void testInsert() throws Exception {
-        final AccountInfo expectedInfo = new AccountInfo("Kerkenbos 1059B", "024 – 348 35 70");
+        final AccountInfo expectedInfo = new AccountInfo("Kerkenbos 1059B", "024 – 348 35 70", "Nijmegen");
         final Account expectedAccount = new Account(1L, "f.dejong@first8.nl", expectedInfo);
 
         final MvcResult result = mvc.perform(
@@ -83,13 +81,15 @@ public class RegistrationIntegrationTest {
         assertThat(actualInfo.getTelephoneNumber(), is(expectedInfo.getTelephoneNumber()));
     }
 
+
     @Test
     public void testInsertDuplicateEmailAddress() throws Exception {
-        Account account = helperService.createAccount("f.dejong@first8.nl", "Kerkenbos 1059B", "024 – 348 35 70");
+        helperService.createAccount("f.dejong@first8.nl", "Kerkenbos 1059B", "024 – 348 35 70", "Nijmegen");
+        final AccountInfo info = new AccountInfo("Kerkenbos 1059B", "024 – 348 35 70", "Nijmegen");
 
         mvc.perform(
-                post("/registration/{emailAddress}", account.getEmailAddress())
-                        .content(accountInfoAsJSON(account.getInfo()))
+                post("/registration/{emailAddress}", "f.dejong@first8.nl")
+                        .content(accountInfoAsJSON(info))
                         .contentType(MediaType.APPLICATION_JSON_UTF8)
                         .accept(MediaType.APPLICATION_JSON_UTF8)
         ).andExpect(status().isConflict());
@@ -98,7 +98,7 @@ public class RegistrationIntegrationTest {
     @Test
     public void testUpdateEmailAddress() throws Exception {
 
-        final Account expectedAccount = helperService.createAccount("f.dejong@first8.nl", "Kerkenbos 1059B", "024 – 348 35 70");
+        final Account expectedAccount = helperService.createAccount("f.dejong@first8.nl", "Kerkenbos 1059B", "024 – 348 35 70", "Utrecht");
         final String newEmailAddress = "t.poll@first8.nl";
 
         final MvcResult result = mvc.perform(
@@ -123,7 +123,7 @@ public class RegistrationIntegrationTest {
     @Test
     public void testUpdateEmailAddressNotExistent() throws Exception {
 
-        Account createdAccount = helperService.createAccount("f.dejong@first8.nl", "Kerkenbos 1059B", "024 – 348 35 70");
+        Account createdAccount = helperService.createAccount("f.dejong@first8.nl", "Kerkenbos 1059B", "024 – 348 35 70", "Utrecht");
 
         final Account expectedAccount = new Account(2L, "t.poll@first8.nl", null);
 
@@ -135,7 +135,7 @@ public class RegistrationIntegrationTest {
 
     @Test
     public void testUpdateEmailAddressNoChange() throws Exception {
-        final Account expectedAccount = helperService.createAccount("f.dejong@first8.nl", "Kerkenbos 1059B", "024 – 348 35 70");
+        final Account expectedAccount = helperService.createAccount("f.dejong@first8.nl", "Kerkenbos 1059B", "024 – 348 35 70", "Utrecht");
 
         final MvcResult result = mvc.perform(
                 put("/registration/{id}/{emailAddress}", expectedAccount.getId(), expectedAccount.getEmailAddress())
@@ -159,7 +159,7 @@ public class RegistrationIntegrationTest {
     @Test
     public void testUpdateAccountInfo() throws Exception {
 
-        final Account expectedAccount = helperService.createAccount("f.dejong@first8.nl", "Kerkenbos 1059B", "024 – 348 35 70");
+        final Account expectedAccount = helperService.createAccount("f.dejong@first8.nl", "Kerkenbos 1059B", "024 – 348 35 70", "Utrecht");
 
         expectedAccount.getInfo().setStreet("Edisonbaan 15");
         expectedAccount.getInfo().setStreet("024 – 348 35 71");
@@ -188,7 +188,7 @@ public class RegistrationIntegrationTest {
     @Test
     public void testUpdateAccountInfoNoChange() throws Exception {
 
-        final Account expectedAccount = helperService.createAccount("f.dejong@first8.nl", "Kerkenbos 1059B", "024 – 348 35 70");
+        final Account expectedAccount = helperService.createAccount("f.dejong@first8.nl", "Kerkenbos 1059B", "024 – 348 35 70", "Utrecht");
 
         final MvcResult result = mvc.perform(
                 put("/registration/{id}", expectedAccount.getId())
@@ -214,9 +214,9 @@ public class RegistrationIntegrationTest {
     @Test
     public void testUpdateInfoNotExistent() throws Exception {
 
-        final Account expectedAccount = helperService.createAccount("f.dejong@first8.nl", "Kerkenbos 1059B", "024 – 348 35 70");
+        final Account expectedAccount = helperService.createAccount("f.dejong@first8.nl", "Kerkenbos 1059B", "024 – 348 35 70", "Utrecht");
 
-        final AccountInfo updatedInfo = new AccountInfo(null, "Edisonbaan 15", "024 – 348 35 70");
+        final AccountInfo updatedInfo = new AccountInfo("Edisonbaan 15", "024 – 348 35 70", "Nimka");
 
         mvc.perform(
                 put("/registration/{id}", expectedAccount.getId() + 1)
@@ -229,8 +229,8 @@ public class RegistrationIntegrationTest {
     @Test
     public void testGetByEmailAddress() throws Exception {
 
-        final Account accountFDeJong = helperService.createAccount("f.dejong@first8.nl", "Kerkenbos 1059B", "024 – 348 35 70");
-        final Account accountTPoll = helperService.createAccount("t.poll@first8.nl", "Edisonbaan 15", "024 – 348 35 71");
+        final Account accountFDeJong = helperService.createAccount("f.dejong@first8.nl", "Kerkenbos 1059B", "024 – 348 35 70", "Utrecht");
+        final Account accountTPoll = helperService.createAccount("t.poll@first8.nl", "Edisonbaan 15", "024 – 348 35 71", "Utrecht");
 
         final MvcResult firstResult = mvc.perform(
                 get("/registration/email_address/{emailAddress}", accountFDeJong.getEmailAddress())
@@ -253,7 +253,7 @@ public class RegistrationIntegrationTest {
 
     @Test
     public void testGetByEmailAddressNotAvailable() throws Exception {
-        helperService.createAccount("f.dejong@first8.nl", "Kerkenbos 1059B", "024 – 348 35 70");
+        helperService.createAccount("f.dejong@first8.nl", "Kerkenbos 1059B", "024 – 348 35 70", "Utrecht");
 
         mvc.perform(
                 get("/registration/email_address/{emailAddress}", "r.boss@first8.nl")
@@ -266,8 +266,8 @@ public class RegistrationIntegrationTest {
     @Test
     public void testGetById() throws Exception {
 
-        final Account accountFDeJong = helperService.createAccount("f.dejong@first8.nl", "Kerkenbos 1059B", "024 – 348 35 70");
-        final Account accountTPoll = helperService.createAccount("t.poll@first8.nl", "Edisonbaan 15", "024 – 348 35 71");
+        final Account accountFDeJong = helperService.createAccount("f.dejong@first8.nl", "Kerkenbos 1059B", "024 – 348 35 70", "Utrecht");
+        final Account accountTPoll = helperService.createAccount("t.poll@first8.nl", "Edisonbaan 15", "024 – 348 35 71", "Utrecht");
 
         final MvcResult firstResult = mvc.perform(
                 get("/registration/id/{id}", accountTPoll.getId())
@@ -291,8 +291,8 @@ public class RegistrationIntegrationTest {
     @Test
     public void testGetByIdNotAvailable() throws Exception {
 
-        Account accountFDeJong = helperService.createAccount("f.dejong@first8.nl", "Kerkenbos 1059B", "024 – 348 35 70");
-        Account accountTPoll = helperService.createAccount("t.poll@first8.nl", "Edisonbaan 15", "024 – 348 35 71");
+        Account accountFDeJong = helperService.createAccount("f.dejong@first8.nl", "Kerkenbos 1059B", "024 – 348 35 70", "Utrecht");
+        Account accountTPoll = helperService.createAccount("t.poll@first8.nl", "Edisonbaan 15", "024 – 348 35 71", "Utrecht");
 
         mvc.perform(
                 get("/registration/id/{id}", Math.max(accountFDeJong.getId(), accountTPoll.getId()) + 1)
@@ -305,8 +305,8 @@ public class RegistrationIntegrationTest {
     @Test
     public void testGetAll() throws Exception {
 
-        Account accountFDeJong = helperService.createAccount("f.dejong@first8.nl", "Kerkenbos 1059B", "024 – 348 35 70");
-        Account accountTPoll = helperService.createAccount("t.poll@first8.nl", "Edisonbaan 15", "024 – 348 35 71");
+        Account accountFDeJong = helperService.createAccount("f.dejong@first8.nl", "Kerkenbos 1059B", "024 – 348 35 70", "Utrecht");
+        Account accountTPoll = helperService.createAccount("t.poll@first8.nl", "Edisonbaan 15", "024 – 348 35 71", "Utrecht");
 
         List<Account> expectedAccounts = Arrays.asList(
                 accountFDeJong,
