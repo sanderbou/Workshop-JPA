@@ -1,5 +1,6 @@
 package nl.first8.hu.ticketsale.registration;
 
+import javax.persistence.CascadeType;
 import javax.persistence.OneToOne;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,19 +20,13 @@ import java.util.List;
 @NoArgsConstructor
 public class Account implements Serializable {
 
-    /*
-     * TODO: synchronize the insert and update of the Account instances with the associated AccountInfo
-     *
-     * (hint: the associated methods for persisting and updating can be simplified by removing a few lines of code)
-     */
-
     @Id
     @GeneratedValue
     private Long id;
 
     private String emailAddress;
 
-    @OneToOne
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private AccountInfo info;
 
     @OneToMany(mappedBy = "account")
