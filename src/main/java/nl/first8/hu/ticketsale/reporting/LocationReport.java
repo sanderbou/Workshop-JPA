@@ -13,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 public class LocationReport implements Serializable {
 
-    private String genre;
+    private String artist;
     private String concertLocations;
     private String accountLocations;
 }
