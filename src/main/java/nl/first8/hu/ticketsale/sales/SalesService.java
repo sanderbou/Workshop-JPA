@@ -34,13 +34,26 @@ public class SalesService {
     }
 
     protected void insertSale(Long accountId, Long concertId, Integer price, final Date timestamp) {
-        //TODO: implement
-        throw new UnsupportedOperationException("Not supported yet!");
+        Account account = registrationRepository.findById(accountId).orElseThrow(() -> new RuntimeException("Unknown account Id " + accountId));
+        Concert concert = venueRepository.findConcertById(concertId).orElseThrow(() -> new RuntimeException("Unknown concert Id " + concertId));
+
+        Ticket ticket = new Ticket(concert, account);
+        salesRepository.insert(ticket);
+
+        Sale sale = new Sale();
+        sale.setTicket(ticket);
+        sale.setPrice(price);
+        sale.setSellDate(timestamp);
+
+        salesRepository.insert(sale);
     }
 
     public Optional<Sale> getSale(Long accountId, Long concertId) {
-        //TODO: implement
-        throw new UnsupportedOperationException("Not supported yet!");
+        Account account = registrationRepository.findById(accountId).orElseThrow(() -> new RuntimeException("Unknown account Id " + accountId));
+        Concert concert = venueRepository.findConcertById(concertId).orElseThrow(() -> new RuntimeException("Unknown concert Id " + concertId));
+
+        return salesRepository.findTicket(new TicketId(concert, account))
+                .flatMap(ticket -> salesRepository.findSaleByTicket(ticket));
     }
 
     @Transactional(Transactional.TxType.REQUIRES_NEW)
