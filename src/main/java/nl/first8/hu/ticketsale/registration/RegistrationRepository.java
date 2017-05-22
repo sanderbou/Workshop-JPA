@@ -26,6 +26,8 @@ public class RegistrationRepository {
      * @throws EntityExistsException if the entity already exists
      */
     public void insert(final Account account) {
+        //TODO: set the cascading operations between Account -> AccountInfo. Afterwards, this method can be simplified.
+
         entityManager.persist(account.getInfo());
         entityManager.persist(account);
     }
@@ -42,6 +44,7 @@ public class RegistrationRepository {
      * already an attached entity
      */
     public Account update(Account account) {
+        //TODO: set the cascading operations between Account -> AccountInfo. Afterwards, this method can be simplified.
 
         final AccountInfo updatedInfo = entityManager.merge(account.getInfo());
         account.setInfo(updatedInfo);
