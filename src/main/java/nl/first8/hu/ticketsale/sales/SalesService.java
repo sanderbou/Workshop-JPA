@@ -46,6 +46,13 @@ public class SalesService {
         sale.setSellDate(timestamp);
 
         salesRepository.insert(sale);
+        insertAuditTrail(sale, account);
+    }
+
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    private void insertAuditTrail(Sale sale, Account account) {
+        AuditTrail auditTrail = new AuditTrail(sale, account);
+        salesRepository.insert(auditTrail);
     }
 
     public Optional<Sale> getSale(Long accountId, Long concertId) {
