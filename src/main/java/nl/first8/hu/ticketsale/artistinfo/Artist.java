@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import nl.first8.hu.ticketsale.venue.Concert;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -15,7 +16,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Artist {
+public class Artist implements Serializable {
     @Id
     @GeneratedValue
     private Long id;
