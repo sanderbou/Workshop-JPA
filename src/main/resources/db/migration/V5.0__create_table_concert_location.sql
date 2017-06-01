@@ -4,12 +4,20 @@ CREATE TABLE location (
   PRIMARY KEY(id)
 );
 
+CREATE TABLE artist (
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  genre VARCHAR(255),
+  name VARCHAR(255),
+    PRIMARY KEY(id)
+);
+
 CREATE TABLE concert (
   id BIGINT NOT NULL AUTO_INCREMENT,
-  artist VARCHAR(255) NOT NULL,
+  artist_id BIGINT NOT NULL,
   genre VARCHAR(255) NOT NULL,
   location_id BIGINT NOT NULL,
   PRIMARY KEY(id),
+  FOREIGN KEY (artist_id) REFERENCES artist(id),
   FOREIGN KEY (location_id) REFERENCES location(id)
 );
 

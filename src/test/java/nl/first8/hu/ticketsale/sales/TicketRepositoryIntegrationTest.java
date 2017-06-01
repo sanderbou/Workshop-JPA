@@ -2,6 +2,7 @@ package nl.first8.hu.ticketsale.sales;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import nl.first8.hu.ticketsale.artistinfo.Artist;
 import nl.first8.hu.ticketsale.registration.Account;
 import nl.first8.hu.ticketsale.util.TestRepository;
 import nl.first8.hu.ticketsale.venue.Concert;
@@ -60,9 +61,9 @@ public class TicketRepositoryIntegrationTest {
 
     @Test
     public void testInsertTicket() throws Exception {
-
+        Artist artist = testRepository.createDefaultArtist("Parov Stellar");
         Account account = testRepository.createDefaultAccount("f.dejong@first8.nl");
-        Concert concert = testRepository.createDefaultConcert("Parov Stellar", "Utrecht");
+        Concert concert = testRepository.createDefaultConcert(artist, "Utrecht");
 
 
         mvc.perform(
@@ -70,18 +71,18 @@ public class TicketRepositoryIntegrationTest {
                         .accept(MediaType.APPLICATION_JSON)
         ).andExpect(status().isOk());
 
-
         final Ticket ticket = testRepository.findTicket(concert, account);
-        assertThat(ticket.getConcert().getArtist(), is(concert.getArtist()));
+        assertThat(ticket.getConcert().getArtist().getName(), is(concert.getArtist().getName()));
         assertThat(ticket.getConcert().getLocation().getName(), is(concert.getLocation().getName()));
     }
 
     @Test
     public void testGetTickets() throws Exception {
-
+        Artist artist1 = testRepository.createDefaultArtist("Gorillaz");
+        Artist artist2 = testRepository.createDefaultArtist("Thievery Cooperation");
         Account account = testRepository.createDefaultAccount("f.dejong@first8.nl");
-        Ticket ticketGorillaz = testRepository.createDefaultTicket(account, "Gorillaz", "Utrecht");
-        Ticket ticketThieveryCo = testRepository.createDefaultTicket(account, "Thievery Cooperation", "Apeldoorn");
+        Ticket ticketGorillaz = testRepository.createDefaultTicket(account, artist1, "Utrecht");
+        Ticket ticketThieveryCo = testRepository.createDefaultTicket(account, artist2, "Apeldoorn");
 
 
         MvcResult result = mvc.perform(
@@ -94,9 +95,9 @@ public class TicketRepositoryIntegrationTest {
 
         List<TicketDto> actualTickets = readTicketsResponse(result);
         assertEquals(2, actualTickets.size());
-        assertEquals(ticketGorillaz.getConcert().getArtist(), actualTickets.get(0).getArtist());
+        assertEquals(ticketGorillaz.getConcert().getArtist().getName(), actualTickets.get(0).getArtist());
         assertEquals(ticketGorillaz.getConcert().getLocation().getName(), actualTickets.get(0).getLocation());
-        assertEquals(ticketThieveryCo.getConcert().getArtist(), actualTickets.get(1).getArtist());
+        assertEquals(ticketThieveryCo.getConcert().getArtist().getName(), actualTickets.get(1).getArtist());
         assertEquals(ticketGorillaz.getConcert().getLocation().getName(), actualTickets.get(0).getLocation());
 
 
@@ -104,9 +105,9 @@ public class TicketRepositoryIntegrationTest {
 
     @Test
     public void testInsertSale() throws Exception {
-
+        Artist artist = testRepository.createDefaultArtist("Disturbed");
         Account account = testRepository.createDefaultAccount("t.poll@first8.nl");
-        Concert concert = testRepository.createDefaultConcert("Disturbed", "Verdedig, Enschede");
+        Concert concert = testRepository.createDefaultConcert(artist, "Verdedig, Enschede");
 
         MvcResult result = mvc.perform(
                 post("/sales/")
@@ -127,9 +128,9 @@ public class TicketRepositoryIntegrationTest {
 
     @Test
     public void testInsertSaleWithoutPayment() throws Exception {
-
+        Artist artist = testRepository.createDefaultArtist("Disturbed");
         Account account = testRepository.createDefaultAccount("t.poll@first8.nl");
-        Concert concert = testRepository.createDefaultConcert("Disturbed", "Verdedig, Enschede");
+        Concert concert = testRepository.createDefaultConcert(artist, "Verdedig, Enschede");
 
         mvc.perform(
                 post("/sales/")
