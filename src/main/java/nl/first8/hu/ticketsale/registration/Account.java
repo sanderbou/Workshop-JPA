@@ -2,6 +2,8 @@ package nl.first8.hu.ticketsale.registration;
 
 import javax.persistence.CascadeType;
 import javax.persistence.OneToOne;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import nl.first8.hu.ticketsale.sales.Ticket;
@@ -29,6 +31,7 @@ public class Account implements Serializable {
     @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private AccountInfo info;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "account")
     private List<Ticket> tickets = new ArrayList<>();
 

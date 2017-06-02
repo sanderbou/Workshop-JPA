@@ -9,6 +9,8 @@ import nl.first8.hu.ticketsale.artistinfo.Artist;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Date;
+
 @Entity
 @Data
 @NoArgsConstructor
@@ -29,5 +31,4 @@ public class Concert implements Serializable {
     @ManyToOne
     @JoinColumn(name = "location_id", referencedColumnName = "id")
     private Location location;
-
 }

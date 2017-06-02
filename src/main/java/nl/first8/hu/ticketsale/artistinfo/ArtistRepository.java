@@ -32,18 +32,4 @@ public class ArtistRepository {
     public Optional<Artist> findById(final Long id) {
         return Optional.ofNullable(entityManager.find(Artist.class, id));
     }
-
-    Optional<Artist> findByName(String name) {
-        try {
-            return Optional.of(entityManager.createQuery("SELECT a FROM Artist a WHERE a.name =:name", Artist.class)
-                    .setParameter("name", name)
-                    .getSingleResult());
-        } catch (NoResultException ex) {
-            return Optional.empty();
-        }
-    }
-
-    public List<Artist> findAll() {
-        return entityManager.createQuery("SELECT a FROM Artist a", Artist.class).getResultList();
-    }
 }

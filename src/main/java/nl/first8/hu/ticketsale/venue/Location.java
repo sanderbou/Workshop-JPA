@@ -1,5 +1,6 @@
 package nl.first8.hu.ticketsale.venue;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,6 +23,7 @@ public class Location implements Serializable {
     @Column(name = "location_name")
     private String name;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "location")
     private List<Concert> concerts;
 

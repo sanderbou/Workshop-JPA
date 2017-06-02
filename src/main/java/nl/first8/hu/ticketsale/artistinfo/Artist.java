@@ -1,5 +1,6 @@
 package nl.first8.hu.ticketsale.artistinfo;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -27,6 +28,7 @@ public class Artist implements Serializable {
 
     private String name;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "artist")
     private List<Concert> concerts;
 
