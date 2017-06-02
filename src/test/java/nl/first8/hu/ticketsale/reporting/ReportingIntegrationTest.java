@@ -3,6 +3,7 @@ package nl.first8.hu.ticketsale.reporting;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.first8.hu.ticketsale.artistinfo.Artist;
+import nl.first8.hu.ticketsale.artistinfo.Genre;
 import nl.first8.hu.ticketsale.registration.Account;
 import nl.first8.hu.ticketsale.util.TestRepository;
 import nl.first8.hu.ticketsale.venue.Concert;
@@ -46,9 +47,9 @@ public class ReportingIntegrationTest {
 
     @Test
     public void testReport() throws Exception {
-        Artist artist1 = helper.createDefaultArtist("Five Finger Death Punch");
-        Artist artist2 = helper.createDefaultArtist("Disturbed");
-        Artist artist3 = helper.createDefaultArtist("Pogo");
+        Artist artist1 = helper.createDefaultArtist("Five Finger Death Punch", Genre.METAL);
+        Artist artist2 = helper.createDefaultArtist("Disturbed", Genre.METAL);
+        Artist artist3 = helper.createDefaultArtist("Pogo", Genre.HARDCORE);
         Concert concertMetal1 = helper.createConcert(artist1, "metal", "Utrecht");
         Concert concertMetal2 = helper.createConcert(artist2, "metal", "Apeldoorn");
         Concert concertElec= helper.createConcert(artist3, "electronica", "Amsterdam");

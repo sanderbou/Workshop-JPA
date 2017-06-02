@@ -1,6 +1,7 @@
 package nl.first8.hu.ticketsale.util;
 
 import nl.first8.hu.ticketsale.artistinfo.Artist;
+import nl.first8.hu.ticketsale.artistinfo.Genre;
 import nl.first8.hu.ticketsale.registration.Account;
 import nl.first8.hu.ticketsale.registration.AccountInfo;
 import nl.first8.hu.ticketsale.sales.Ticket;
@@ -20,8 +21,8 @@ public class TestRepository {
     private EntityManager entityManager;
 
     @Transactional(Transactional.TxType.REQUIRES_NEW)
-    public Artist createDefaultArtist(String artistName) {
-        Artist artist = new Artist(artistName);
+    public Artist createDefaultArtist(String artistName, Genre genre) {
+        Artist artist = new Artist(artistName, genre);
         entityManager.persist(artist);
         return artist;
     }

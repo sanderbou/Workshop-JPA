@@ -3,6 +3,7 @@ package nl.first8.hu.ticketsale.sales;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.first8.hu.ticketsale.artistinfo.Artist;
+import nl.first8.hu.ticketsale.artistinfo.Genre;
 import nl.first8.hu.ticketsale.registration.Account;
 import nl.first8.hu.ticketsale.util.TestRepository;
 import nl.first8.hu.ticketsale.venue.Concert;
@@ -61,7 +62,7 @@ public class TicketRepositoryIntegrationTest {
 
     @Test
     public void testInsertTicket() throws Exception {
-        Artist artist = testRepository.createDefaultArtist("Parov Stellar");
+        Artist artist = testRepository.createDefaultArtist("Parov Stellar", Genre.BASS_HOUSE);
         Account account = testRepository.createDefaultAccount("f.dejong@first8.nl");
         Concert concert = testRepository.createDefaultConcert(artist, "Utrecht");
 
@@ -78,8 +79,8 @@ public class TicketRepositoryIntegrationTest {
 
     @Test
     public void testGetTickets() throws Exception {
-        Artist artist1 = testRepository.createDefaultArtist("Gorillaz");
-        Artist artist2 = testRepository.createDefaultArtist("Thievery Cooperation");
+        Artist artist1 = testRepository.createDefaultArtist("Gorillaz", Genre.METAL);
+        Artist artist2 = testRepository.createDefaultArtist("Thievery Cooperation", Genre.HARDCORE);
         Account account = testRepository.createDefaultAccount("f.dejong@first8.nl");
         Ticket ticketGorillaz = testRepository.createDefaultTicket(account, artist1, "Utrecht");
         Ticket ticketThieveryCo = testRepository.createDefaultTicket(account, artist2, "Apeldoorn");
@@ -105,7 +106,7 @@ public class TicketRepositoryIntegrationTest {
 
     @Test
     public void testInsertSale() throws Exception {
-        Artist artist = testRepository.createDefaultArtist("Disturbed");
+        Artist artist = testRepository.createDefaultArtist("Disturbed", Genre.METAL);
         Account account = testRepository.createDefaultAccount("t.poll@first8.nl");
         Concert concert = testRepository.createDefaultConcert(artist, "Verdedig, Enschede");
 
@@ -128,7 +129,7 @@ public class TicketRepositoryIntegrationTest {
 
     @Test
     public void testInsertSaleWithoutPayment() throws Exception {
-        Artist artist = testRepository.createDefaultArtist("Disturbed");
+        Artist artist = testRepository.createDefaultArtist("Disturbed", Genre.METAL);
         Account account = testRepository.createDefaultAccount("t.poll@first8.nl");
         Concert concert = testRepository.createDefaultConcert(artist, "Verdedig, Enschede");
 

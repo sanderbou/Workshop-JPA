@@ -32,7 +32,8 @@ public class Artist implements Serializable {
     @OneToMany(mappedBy = "artist")
     private List<Concert> concerts;
 
-    public Artist(String name){
+    public Artist(String name, Genre genre){
         this.name = name;
+        this.genre=genre;
     }
 }
